@@ -132,3 +132,64 @@ h1 {
         color: #ff9999;
     }
 }
+
+/* Estilos para el indicador de profundidad */
+.depth-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 999;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: color 0.3s ease;
+}
+
+/* Estilos para el indicador de profundidad en modo oscuro */
+@media (prefers-color-scheme: dark) {
+    .depth-indicator {
+        background-color: rgba(20, 20, 20, 0.7);
+    }
+}
+
+/* Estilos para los textos flotantes */
+.floating-text-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.floating-text {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 1s ease;
+    color: rgba(100, 100, 100, 0.2);
+    font-weight: 300;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    user-select: none;
+}
+
+.floating-text .adjetivo {
+    font-weight: bold;
+    color: rgba(100, 100, 100, 0.3);
+}
+
+/* Estilos para los textos flotantes en modo oscuro */
+@media (prefers-color-scheme: dark) {
+    .floating-text {
+        color: rgba(200, 200, 200, 0.2);
+    }
+    
+    .floating-text .adjetivo {
+        color: rgba(200, 200, 200, 0.3);
+    }
+}

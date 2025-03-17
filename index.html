@@ -6,6 +6,9 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <title>Galería de Fotos</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="depth-indicator.js" defer></script>
+    <script src="floating-text.js" defer></script>
+    <script src="mensaje-judeomason.js" defer></script>
 </head>
 <body>
     <h1>Galería de <span class="wiggle">LEO</span></h1>
@@ -38,7 +41,7 @@
             images.forEach(file => {
               const item = document.createElement('div');
               item.className = 'gallery-item';
-              item.innerHTML = `<img src="images/${file}" alt="Foto" data-speed="${Math.random() * 0.5 + 0.2}" style="--scale: ${(Math.random() * 0.2 + 0.9).toFixed(2)};">`;
+              item.innerHTML = `<img src="images/${file}" alt="Foto" data-speed="${Math.random() * 0.5 + 0.2}" style="--scale: ${(Math.random() * 0.2 + 0.9).toFixed(2)};">`;  
               gallery.appendChild(item);
             });
           })
@@ -75,15 +78,18 @@
                 const item = img.parentElement;
                 let currentX = parseFloat(item.style.transform.replace('translateX(', '').replace('vw)', '')) || 0;
 
-                // Reciclar elementos al salir de pantalla
+                // Mover elementos hacia la izquierda constantemente
+                currentX -= speed * delta * 0.05;
+                
+                // Reciclar elementos al salir completamente de la pantalla por la izquierda
                 if (currentX < -20) {
-                    currentX = 120;
-                    item.style.transform = `translateX(${currentX}vw)`;
+                    // Reposicionar fuera de la vista por la derecha sin saltos visibles
+                    currentX = 100; // Colocar justo fuera de la pantalla por la derecha
+                    // Asignar nueva velocidad aleatoria para variedad
                     img.dataset.speed = Math.random() * 0.5 + 0.2;
-                } else {
-                    currentX -= speed * delta * 0.05;
                 }
-
+                
+                // Aplicar la transformación
                 item.style.transform = `translateX(${currentX}vw)`;
             });
             
@@ -92,6 +98,8 @@
         
         // Detección de scroll infinito
         let loading = false;
+        let mensajeJudeomasonMostrado = false;
+
         window.addEventListener('scroll', () => {
             console.log('Scroll detectado!', 
                 'Altura ventana:', window.innerHeight, 
@@ -104,13 +112,19 @@
                     'Límite:', document.documentElement.scrollHeight - 500);
                 loading = true;
                 
+                // Mostrar mensaje JUDEOMASON cuando se llega al final
+                if (!mensajeJudeomasonMostrado) {
+                    mostrarMensajeJudeomason();
+                    mensajeJudeomasonMostrado = true;
+                }
+                
                 try {
                     // Clonar y mezclar imágenes existentes
                     const shuffled = [...images].sort(() => Math.random() - 0.5);
                     shuffled.forEach(file => {
                         const item = document.createElement('div');
                         item.className = 'gallery-item';
-                        item.innerHTML = `<img src="images/${file}" alt="Foto" data-speed="${Math.random() * 0.5 + 0.2}">`;
+                        item.innerHTML = `<img src="images/${file}" alt="Foto" data-speed="${Math.random() * 0.5 + 0.2}" style="--scale: ${(Math.random() * 0.2 + 0.9).toFixed(2)};">`;  
                         gallery.appendChild(item);
                     });
                     console.log('Nuevas imágenes agregadas:', shuffled.length);
