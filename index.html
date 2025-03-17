@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <title>Galería de Fotos</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -25,20 +26,19 @@
         const gallery = document.querySelector('.gallery');
 
         // Cargar imágenes dinámicamente
-        fetch('images/')
-          .then(response => response.text())
-          .then(html => {
-            const doc = new DOMParser().parseFromString(html, 'text/html');
-            const images = Array.from(doc.querySelectorAll('a'))
-              .map(a => a.href.split('/').pop())
+        let images;
+
+        fetch('images.json?' + new Date().getTime())
+          .then(response => response.json())
+          .then(data => {
+            images = data
               .filter(file => /.(jpe?g|png|gif|webp)$/i.test(file))
               .sort(() => Math.random() - 0.5);
 
             images.forEach(file => {
               const item = document.createElement('div');
               item.className = 'gallery-item';
-              item.innerHTML = `<img src="images/${file}" alt="Foto" data-speed="${Math.random() * 0.5 + 0.2}">`;
-              item.style.transform = `translateX(${Math.random() * 100}vw)`;
+              item.innerHTML = `<img src="images/${file}" alt="Foto" data-speed="${Math.random() * 0.5 + 0.2}" style="--scale: ${(Math.random() * 0.2 + 0.9).toFixed(2)};">`;
               gallery.appendChild(item);
             });
           })
@@ -93,20 +93,34 @@
         // Detección de scroll infinito
         let loading = false;
         window.addEventListener('scroll', () => {
-            if (!loading && window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+            console.log('Scroll detectado!', 
+                'Altura ventana:', window.innerHeight, 
+                'ScrollY:', window.scrollY, 
+                'Altura total:', document.documentElement.scrollHeight);
+            
+            if (!loading && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 100) {
+                console.log('Cargando más imágenes...', 
+                    'Calculado:', window.innerHeight + window.scrollY, 
+                    'Límite:', document.documentElement.scrollHeight - 500);
                 loading = true;
                 
-                // Clonar y mezclar imágenes existentes
-                const shuffled = [...images].sort(() => Math.random() - 0.5);
-                shuffled.forEach(file => {
-                    const item = document.createElement('div');
-                    item.className = 'gallery-item';
-                    item.innerHTML = `<img src="images/${file}" alt="Foto" data-speed="${Math.random() * 0.5 + 0.2}">`;
-                    item.style.transform = `translateX(${Math.random() * 100 + 100}vw)`;
-                    gallery.appendChild(item);
-                });
-                
-                loading = false;
+                try {
+                    // Clonar y mezclar imágenes existentes
+                    const shuffled = [...images].sort(() => Math.random() - 0.5);
+                    shuffled.forEach(file => {
+                        const item = document.createElement('div');
+                        item.className = 'gallery-item';
+                        item.innerHTML = `<img src="images/${file}" alt="Foto" data-speed="${Math.random() * 0.5 + 0.2}">`;
+                        gallery.appendChild(item);
+                    });
+                    console.log('Nuevas imágenes agregadas:', shuffled.length);
+                } catch (error) {
+                    console.error('Error cargando imágenes:', error);
+                } finally {
+                    setTimeout(() => {
+                        loading = false;
+                    }, 100);
+                }
             }
         });
         requestAnimationFrame(animate);
