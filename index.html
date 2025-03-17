@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galería de Fotos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Galería de <span class="wiggle">LEO</span></h1>
+    
+    <div class="gallery"></div>
+    
+    <!-- Modal para ver imagen ampliada -->
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImg">
+    </div>
+    
+    <script>
+        // Obtener elementos del DOM
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImg');
+        const closeBtn = document.getElementsByClassName('close')[0];
+        const gallery = document.querySelector('.gallery');
+
+        // Cargar imágenes dinámicamente
+        fetch('images/')
+          .then(response => response.text())
+          .then(html => {
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const images = Array.from(doc.querySelectorAll('a'))
+              .map(a => a.href.split('/').pop())
+              .filter(file => /.(jpe?g|png|gif|webp)$/i.test(file))
+              .sort(() => Math.random() - 0.5);
+
+            images.forEach(file => {
+              const item = document.createElement('div');
+              item.className = 'gallery-item';
+              item.innerHTML = `<img src="images/${file}" alt="Foto" data-speed="${Math.random() * 0.5 + 0.2}">`;
+              item.style.transform = `translateX(${Math.random() * 100}vw)`;
+              gallery.appendChild(item);
+            });
+          })
+          .catch(console.error);
+
+        // Evento delegado para las imágenes
+        gallery.addEventListener('click', e => {
+          if (e.target.tagName === 'IMG') {
+            modal.style.display = 'block';
+            modalImg.src = e.target.src;
+          }
+        });
+        
+        // Cerrar modal al hacer clic en la X
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+        
+        // Cerrar modal al hacer clic fuera de la imagen
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Animación de desplazamiento automático
+        let lastTime = 0;
+        function animate(time) {
+            const delta = time - lastTime;
+            lastTime = time;
+            
+            document.querySelectorAll('.gallery-item img').forEach(img => {
+                const speed = parseFloat(img.dataset.speed);
+                const item = img.parentElement;
+                let currentX = parseFloat(item.style.transform.replace('translateX(', '').replace('vw)', '')) || 0;
+
+                // Reciclar elementos al salir de pantalla
+                if (currentX < -20) {
+                    currentX = 120;
+                    item.style.transform = `translateX(${currentX}vw)`;
+                    img.dataset.speed = Math.random() * 0.5 + 0.2;
+                } else {
+                    currentX -= speed * delta * 0.05;
+                }
+
+                item.style.transform = `translateX(${currentX}vw)`;
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Detección de scroll infinito
+        let loading = false;
+        window.addEventListener('scroll', () => {
+            if (!loading && window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+                loading = true;
+                
+                // Clonar y mezclar imágenes existentes
+                const shuffled = [...images].sort(() => Math.random() - 0.5);
+                shuffled.forEach(file => {
+                    const item = document.createElement('div');
+                    item.className = 'gallery-item';
+                    item.innerHTML = `<img src="images/${file}" alt="Foto" data-speed="${Math.random() * 0.5 + 0.2}">`;
+                    item.style.transform = `translateX(${Math.random() * 100 + 100}vw)`;
+                    gallery.appendChild(item);
+                });
+                
+                loading = false;
+            }
+        });
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
