@@ -1,10 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue&display=swap');
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Comic+Neue&display=swap');
 
 @keyframes wiggle {
     0%, 100% { transform: rotate(0deg); }
